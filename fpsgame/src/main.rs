@@ -2,6 +2,8 @@ use bevy::{render::camera::Camera, input::mouse::MouseMotion, prelude::*};
 use player::Player;
 
 mod player;
+mod physics;
+mod math;
 
 fn main() {
     App::build()
