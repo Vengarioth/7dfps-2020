@@ -1,5 +1,8 @@
 use crate::math::IVec3;
 
+mod baking;
+mod bvh;
+
 // TASK impl convenience functions for AABB
 
 #[derive(Debug)]

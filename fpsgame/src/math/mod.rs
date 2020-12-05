@@ -1,5 +1,8 @@
 // TASK: impl add, sub, div, mul etc for the structs
 
+mod ray;
+pub use ray::*;
+
 #[derive(Debug)]
 pub struct IVec3 {
     pub x: i32,
