@@ -50,16 +50,16 @@ impl Bvh {
     }
 
     pub fn intersect_recursive(&self, index: usize, ray: &Ray, intersections: &mut Vec<Intersection>) {
-        match self.nodes[index] {
+        match &self.nodes[index] {
             BvhNode::Branch { bounds, left, right } => {
                 if bounds.intersects(ray) {
-                    self.intersect_recursive(left, ray, intersections);
-                    self.intersect_recursive(right, ray, intersections);
+                    self.intersect_recursive(*left, ray, intersections);
+                    self.intersect_recursive(*right, ray, intersections);
                 }
             },
             BvhNode::Leaf { bounds, primitive } => {
                 if bounds.intersects(ray) {
-                    if let Some(intersection) = self.triangles[primitive].intersects(ray) {
+                    if let Some(intersection) = self.triangles[*primitive].intersects(ray) {
                         intersections.push(intersection);
                     }
                 }
