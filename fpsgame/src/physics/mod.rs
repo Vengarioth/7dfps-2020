@@ -20,6 +20,8 @@ impl AABB {
         !(other.position.x + other.size.x <= self.position.x ||
         other.position.x >= self.position.x + self.size.x ||
         other.position.y + other.size.y <= self.position.y ||
-        other.position.y >= self.position.y + self.size.y)
+        other.position.y >= self.position.y + self.size.y ||
+        other.position.z + other.size.z <= self.position.z ||
+        other.position.z >= self.position.z + self.size.z)
     }
 }
