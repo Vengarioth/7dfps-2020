@@ -22,8 +22,35 @@ impl Bounds {
     }
 
     pub fn intersects(&self, ray: &Ray) -> bool {
-        // TODO implement AABB-ray intersection
-        true
+        #[inline(always)]
+        fn min_max(min: f32, max: f32, origin: f32, direction: f32) -> (f32, f32) {
+            let t_min = (min - origin) / direction;
+            let t_max = (max - origin) / direction;
+
+            if t_min > t_max {
+                (t_max, t_min)
+            } else {
+                (t_min, t_max)
+            }
+        }
+
+        let (tmin, tmax) = min_max(self.min.x(), self.max.x(), ray.origin.x(), ray.direction.x());
+        let (tymin, tymax) = min_max(self.min.y(), self.max.y(), ray.origin.y(), ray.direction.y());
+
+        if tmin > tymax || tymin > tmax {
+            return false;
+        }
+
+        let tmin = tmin.max(tymin);
+        let tmax = tmax.min(tymax);
+
+        let (tzmin, tzmax) = min_max(self.min.z(), self.max.z(), ray.origin.z(), ray.direction.z());
+
+        if tmin > tzmax || tzmin > tmax {
+            return false;
+        }
+
+        return true;
     }
 
     pub fn join(&self, other: &Self) -> Self {
