@@ -123,9 +123,20 @@ fn update_camera(
     mut camera_query: Query<(&Camera, &mut Transform)>,
 ) {
     for (player, player_transform) in player_query.iter() {
-        let rotation = Quat::from_rotation_ypr(player.yaw, player.pitch, 0.0);
-        let direction = Vec3::unit_z();
-        let direction = (rotation * direction).normalize();
+        let direction = Vec3::new(0.0, 0.0, 1.0);
+        let direction = Vec3::new(
+            direction.x(),
+            direction.y() * player.pitch.cos() - direction.z() * player.pitch.sin(),
+            direction.z() * player.pitch.cos() - direction.y() * player.pitch.sin(),
+        );
+
+        let direction = Vec3::new(
+            direction.x() * player.yaw.cos() - direction.z() * player.yaw.sin(),
+            direction.y(),
+            direction.z() * player.yaw.cos() - direction.x() * player.yaw.sin(),
+        );
+
+        let direction = direction.normalize();
 
         for (_camera, mut transform) in camera_query.iter_mut() {
             let camera_position = player_transform.translation + (Vec3::unit_y() * player.camera_height);
