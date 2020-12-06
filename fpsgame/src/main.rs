@@ -1,5 +1,22 @@
-use bevy::{render::camera::Camera, input::mouse::MouseMotion, prelude::*};
-use bevy_rapier3d::{physics::RapierPhysicsPlugin, render::RapierRenderPlugin, rapier::{geometry::ColliderBuilder, dynamics::RigidBodyBuilder}};
+use bevy::{
+    app::AppExit, 
+    input::keyboard::{
+        KeyCode,
+    }, input::mouse::{
+        MouseMotion,
+        MouseButton,
+    }, prelude::*, render::camera::Camera, window::{
+        WindowMode,
+    }};
+use bevy_rapier3d::{
+    physics::RapierPhysicsPlugin, 
+    render::RapierRenderPlugin, 
+    rapier::{
+        geometry::ColliderBuilder, 
+        dynamics::RigidBodyBuilder
+    }
+};
+
 use player::Player;
 
 mod player;
@@ -8,6 +25,16 @@ mod math;
 
 fn main() {
     App::build()
+        .add_resource(WindowDescriptor {
+            width: 1920,
+            height: 1080,
+            vsync: true,
+            title: "Pet Tower Defense".to_string(),
+            cursor_visible: false,
+            cursor_locked: true,
+            mode: WindowMode::BorderlessFullscreen,
+            ..Default::default()
+        })
         .add_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin)
@@ -16,6 +43,7 @@ fn main() {
         .add_system(update_look_direction.system())
         .add_system(move_player.system())
         .add_system(update_camera.system())
+        .add_system(toggle_cursor_and_exit.system())
         .run();
 }
 
@@ -125,6 +153,37 @@ fn update_camera(
         for (_camera, mut transform) in camera_query.iter_mut() {
             *transform = Transform::from_translation(player_transform.translation)
             .looking_at(player_transform.translation + direction, Vec3::unit_y());
+        }
+    }
+}
+
+pub fn toggle_cursor_and_exit(
+    keyboard_input: Res<Input<KeyCode>>,
+    mouse_button_input: Res<Input<MouseButton>>,
+    mut windows: ResMut<Windows>,
+    mut app_exit_events: ResMut<Events<AppExit>>,
+){
+    if let Some(window) = windows.get_primary_mut() {
+        if keyboard_input.just_pressed(KeyCode::Escape)
+        {
+            if window.cursor_locked()
+            {
+                //unlock the cursor if it's locked
+                window.set_cursor_lock_mode(false);
+                window.set_cursor_visibility(true);
+            }
+            else
+            {
+                //exit the app if the cursor is unlocked
+                app_exit_events.send(AppExit);
+            }
+        }
+
+        if mouse_button_input.just_pressed(MouseButton::Left) && 
+           !window.cursor_locked()
+        {
+            window.set_cursor_lock_mode(true);
+            window.set_cursor_visibility(false);
         }
     }
 }
