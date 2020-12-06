@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 bevy = "0.3"
-bevy_rapier3d = { version = "0.6", features = ["simd-stable", "parallel"] }
+gltf = "0.15"
