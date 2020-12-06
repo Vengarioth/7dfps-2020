@@ -15,4 +15,9 @@ impl Ray {
             length,
         }
     }
+
+    // returns the point with distance `t` from the ray's origin along the ray's direction
+    pub fn get_point(&self, t: f32) -> Vec3 {
+        self.origin + (self.direction * t)
+    }
 }

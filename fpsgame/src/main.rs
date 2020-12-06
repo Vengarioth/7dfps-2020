@@ -150,11 +150,15 @@ fn raycast(bvh: Res<crate::physics::bvh::Bvh>, player_query: Query<(&Player, &Tr
     for (_, transform) in player_query.iter() {
         let ray = math::Ray::new(transform.translation, -Vec3::unit_y(), std::f32::INFINITY);
 
-        let now = std::time::Instant::now();
         let intersections = bvh.intersects(&ray);
-        println!("intersection test took {:?}", now.elapsed());
+        if intersections.len() == 0 {
+            continue;
+        }
 
-        dbg!(intersections.len());
+        let t = intersections.iter().fold(std::f32::INFINITY, |a, i| a.min(i.t));
+        let p = ray.get_point(t);
+
+        dbg!(p);
     }
 
 }
