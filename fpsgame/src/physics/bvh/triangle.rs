@@ -1,6 +1,6 @@
 use bevy::math::*;
 use crate::math::Ray;
-use super::Intersection;
+use super::{Bounds, Intersection};
 
 #[derive(Debug)]
 pub struct Triangle {
@@ -16,6 +16,12 @@ impl Triangle {
             b,
             c,
         }
+    }
+
+    pub fn get_bounds(&self) -> Bounds {
+        let min = self.a.min(self.b.min(self.c));
+        let max = self.a.max(self.b.max(self.c));
+        Bounds::new(min, max)
     }
 
     pub fn intersects(&self, ray: &Ray) -> Option<Intersection> {

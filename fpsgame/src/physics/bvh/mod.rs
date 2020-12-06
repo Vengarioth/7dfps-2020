@@ -1,7 +1,9 @@
+mod axis;
 mod bounds;
 mod triangle;
 mod intersection;
 
+pub use axis::*;
 pub use bounds::*;
 pub use triangle::*;
 pub use intersection::*;
@@ -37,8 +39,12 @@ impl Bvh {
         }
     }
 
-    pub fn insert(&mut self, triangle: Triangle) {
-        todo!() // TODO implement building bvh on insertion
+    pub fn from_prebuilt(nodes: Vec<BvhNode>, root: Option<usize>, triangles: Vec<Triangle>) -> Self {
+        Self {
+            nodes,
+            root,
+            triangles,
+        }
     }
 
     pub fn intersects(&self, ray: &Ray) -> Vec<Intersection> {
@@ -47,6 +53,27 @@ impl Bvh {
             self.intersect_recursive(root, ray, &mut intersections);
         }
         intersections
+    }
+
+    pub fn calculate_cost(&self) -> f32 {
+        let mut stack = Vec::new();
+        if let Some(root) = self.root {
+            stack.push(root);
+        }
+
+        let mut cost = 0.0;
+        while let Some(index) = stack.pop() {
+            match &self.nodes[index] {
+                BvhNode::Branch { bounds, left, right} => {
+                    cost += bounds.surface_area();
+                    stack.push(*left);
+                    stack.push(*right);
+                },
+                BvhNode::Leaf { .. } => { /* do nothing */ }
+            }
+        }
+
+        cost
     }
 
     pub fn intersect_recursive(&self, index: usize, ray: &Ray, intersections: &mut Vec<Intersection>) {
