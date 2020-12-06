@@ -16,33 +16,54 @@ pub struct IVec2 {
 
 impl IVec2 {
     fn unit_x() -> Self {
-        IVec2 { x: 1, y: 0 }
+        Self { x: 1, y: 0 }
     }
 
     fn unit_y() -> Self {
-        IVec2 { x: 0, y: 1 }
+        Self { x: 0, y: 1 }
     }
 
     fn splat(num: i32) -> Self {
-        IVec2 { x: num, y: num }
+        Self { x: num, y: num }
     }
+
+    fn perp_dot(self, other: Self) -> i32 {
+        (self.x * other.y) - (self.y * other.x)
+    }
+
+    fn extend(self, z: i32) -> IVec3 {
+        IVec3 { x: self.x, y: self.y, z }
+    }
+
 }
 
 impl IVec3 {
     fn unit_x() -> Self {
-        IVec3 { x: 1, y: 0, z: 0 }
+        Self { x: 1, y: 0, z: 0 }
     }
 
     fn unit_y() -> Self {
-        IVec3 { x: 0, y: 1, z: 0 }
+        Self { x: 0, y: 1, z: 0 }
     }
 
     fn unit_z() -> Self {
-        IVec3 { x: 0, y: 0, z: 1 }
+        Self { x: 0, y: 0, z: 1 }
     }
 
     fn splat(num: i32) -> Self {
-        IVec3 { x: num, y: num, z: num }
+        Self { x: num, y: num, z: num }
+    }
+
+    fn cross(self, other: Self) -> Self {
+        Self { 
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
+         }
+    }
+
+    fn truncate(self) -> IVec2 {
+        IVec2 { x: self.x, y: self.y }
     }
 }
 
@@ -161,22 +182,16 @@ mod tests {
     }
 
     #[test]
-    fn degrees_to_radians_90_returns_half_pi() {
+    fn test_degrees_to_radians() {
         assert_eq!(degrees_to_radians(90f32), std::f32::consts::PI/2f32);
-    }
-
-    #[test]
-    fn degrees_to_radians_180_returns_pi() {
         assert_eq!(degrees_to_radians(180f32), std::f32::consts::PI);
+        assert_eq!(degrees_to_radians(360f32), std::f32::consts::PI*2f32);
     }
     
     #[test]
-    fn radians_to_degree_pi_returns_90() {
+    fn test_radians_to_degrees() {
         assert_eq!(radians_to_degrees(std::f32::consts::PI/2f32), 90f32);
-    }
-
-    #[test]
-    fn radians_to_degree_pi_returns_180() {
         assert_eq!(radians_to_degrees(std::f32::consts::PI), 180f32);
+        assert_eq!(radians_to_degrees(std::f32::consts::PI*2f32), 360f32);
     }
 }
