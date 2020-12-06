@@ -41,7 +41,7 @@ fn setup(
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
         })
-        .spawn((Player::new(0.0, 0.0), Transform::from_translation(Vec3::new(0.0, 5.0, 0.0))));
+        .spawn((Player::new(4.012901, 0.3168293), Transform::from_translation(Vec3::new(-3.1755996, 5.0, 2.4332705))));
 }
 
 #[derive(Default)]
