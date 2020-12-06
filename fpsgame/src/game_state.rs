@@ -4,6 +4,7 @@ use bevy::{
     prelude::*,
 };
 
+//lock cursor on click, unlock cursor on escape, exit if escape pressed twice
 pub fn toggle_cursor_and_exit(
     keyboard_input: Res<Input<KeyCode>>,
     mouse_button_input: Res<Input<MouseButton>>,
