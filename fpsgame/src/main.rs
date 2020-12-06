@@ -128,13 +128,8 @@ fn update_camera(
         let direction = (rotation * direction).normalize();
 
         for (_camera, mut transform) in camera_query.iter_mut() {
-<<<<<<< HEAD
             let camera_position = player_transform.translation + (Vec3::unit_y() * player.camera_height);
             *transform = Transform::from_translation(camera_position).looking_at(camera_position + direction, Vec3::unit_y());
-=======
-            *transform = Transform::from_translation(player_transform.translation)
-            .looking_at(player_transform.translation + direction, Vec3::unit_y());
->>>>>>> main
         }
     }
 }
