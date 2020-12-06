@@ -14,6 +14,38 @@ pub struct IVec2 {
     pub y: i32,
 }
 
+impl IVec2 {
+    fn unit_x() -> Self {
+        IVec2 { x: 1, y: 0 }
+    }
+
+    fn unit_y() -> Self {
+        IVec2 { x: 0, y: 1 }
+    }
+
+    fn splat(num: i32) -> Self {
+        IVec2 { x: num, y: num }
+    }
+}
+
+impl IVec3 {
+    fn unit_x() -> Self {
+        IVec3 { x: 1, y: 0, z: 0 }
+    }
+
+    fn unit_y() -> Self {
+        IVec3 { x: 0, y: 1, z: 0 }
+    }
+
+    fn unit_z() -> Self {
+        IVec3 { x: 0, y: 0, z: 1 }
+    }
+
+    fn splat(num: i32) -> Self {
+        IVec3 { x: num, y: num, z: num }
+    }
+}
+
 impl Add for IVec3 {
     type Output = Self;
 
