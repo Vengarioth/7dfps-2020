@@ -1,5 +1,4 @@
 use bevy::{render::camera::Camera, input::mouse::MouseMotion, prelude::*};
-use bevy_rapier3d::{physics::RapierPhysicsPlugin, render::RapierRenderPlugin, rapier::{geometry::ColliderBuilder, dynamics::RigidBodyBuilder}};
 use player::Player;
 
 mod player;
@@ -7,11 +6,12 @@ mod physics;
 mod math;
 
 fn main() {
+    let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
+
     App::build()
         .add_resource(Msaa { samples: 4 })
+        .add_resource(world)
         .add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin)
-        .add_plugin(RapierRenderPlugin)
         .add_startup_system(setup.system())
         .add_system(update_look_direction.system())
         .add_system(move_player.system())
@@ -23,8 +23,10 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     commands
+        .spawn_scene(asset_server.load("physics/test.glb"))
         .spawn(PbrComponents {
             mesh: meshes.add(Mesh::from(shape::Plane { size: 10.0 })),
             material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
@@ -39,18 +41,7 @@ fn setup(
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
         })
-        .spawn((Player {
-            yaw: 0.0,
-            pitch: 0.0,
-        }, Transform::from_translation(Vec3::new(-3.0, 5.0, 8.0))));
-
-    let rigid_body1 = RigidBodyBuilder::new_static();
-    let collider1 = ColliderBuilder::cuboid(10.0, 1.0, 10.0);
-    commands.spawn((rigid_body1, collider1));
-
-    let rigid_body2 = RigidBodyBuilder::new_dynamic().translation(0.0, 3.0, 0.0);
-    let collider2 = ColliderBuilder::ball(0.5);
-    commands.spawn((rigid_body2, collider2));
+        .spawn((Player::new(0.0, 0.0), Transform::from_translation(Vec3::new(0.0, 5.0, 0.0))));
 }
 
 #[derive(Default)]
@@ -77,6 +68,7 @@ fn update_look_direction(
 
 fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
+    world: Res<crate::physics::World>,
     mut player_query: Query<(&Player, &mut Transform)>,
 ) {
     let mut player_move = Vec3::default();
@@ -109,6 +101,19 @@ fn move_player(
             player_move.z() * cos + player_move.x() * sin,
         );
 
+        let ray = math::Ray::new(transform.translation + (Vec3::unit_y() * player.raycast_offset), -Vec3::unit_y(), 2.0);
+        if let Some(intersection) = world.raycast(&ray) {
+            let height = intersection.position.y() - player.raycast_offset;
+            if height <= 0.0 {
+                // in solid ground
+            } else {
+                // above solid ground
+            }
+        } else {
+            // not above solid ground
+            transform.translation += -Vec3::unit_y() * 0.016;
+        }
+
         transform.translation += player_move;
     }
 }
@@ -123,8 +128,13 @@ fn update_camera(
         let direction = (rotation * direction).normalize();
 
         for (_camera, mut transform) in camera_query.iter_mut() {
+<<<<<<< HEAD
+            let camera_position = player_transform.translation + (Vec3::unit_y() * player.camera_height);
+            *transform = Transform::from_translation(camera_position).looking_at(camera_position + direction, Vec3::unit_y());
+=======
             *transform = Transform::from_translation(player_transform.translation)
             .looking_at(player_transform.translation + direction, Vec3::unit_y());
+>>>>>>> main
         }
     }
 }

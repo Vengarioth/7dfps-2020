@@ -1,5 +1,8 @@
 use std::ops::{Add, Sub, Mul, Div};
 
+mod ray;
+pub use ray::*;
+
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct IVec3 {
     pub x: i32,
