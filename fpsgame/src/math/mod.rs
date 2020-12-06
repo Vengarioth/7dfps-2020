@@ -1,4 +1,3 @@
-// TASK: impl add, sub, div, mul etc for the structs
 use std::ops::{Add, Sub, Mul, Div};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -12,29 +11,6 @@ pub struct IVec3 {
 pub struct IVec2 {
     pub x: i32,
     pub y: i32,
-}
-
-impl IVec2 {
-    fn unit_x() -> Self {
-        Self { x: 1, y: 0 }
-    }
-
-    fn unit_y() -> Self {
-        Self { x: 0, y: 1 }
-    }
-
-    fn splat(num: i32) -> Self {
-        Self { x: num, y: num }
-    }
-
-    fn perp_dot(self, other: Self) -> i32 {
-        (self.x * other.y) - (self.y * other.x)
-    }
-
-    fn extend(self, z: i32) -> IVec3 {
-        IVec3 { x: self.x, y: self.y, z }
-    }
-
 }
 
 impl IVec3 {
@@ -65,6 +41,29 @@ impl IVec3 {
     fn truncate(self) -> IVec2 {
         IVec2 { x: self.x, y: self.y }
     }
+}
+
+impl IVec2 {
+    fn unit_x() -> Self {
+        Self { x: 1, y: 0 }
+    }
+
+    fn unit_y() -> Self {
+        Self { x: 0, y: 1 }
+    }
+
+    fn splat(num: i32) -> Self {
+        Self { x: num, y: num }
+    }
+
+    fn perp_dot(self, other: Self) -> i32 {
+        (self.x * other.y) - (self.y * other.x)
+    }
+
+    fn extend(self, z: i32) -> IVec3 {
+        IVec3 { x: self.x, y: self.y, z }
+    }
+
 }
 
 impl Add for IVec3 {
