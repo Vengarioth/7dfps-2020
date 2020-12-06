@@ -1,11 +1,14 @@
-mod baking;
 pub mod bvh;
+mod baking;
+mod world;
+
+pub use world::*;
 
 use self::bvh::Triangle;
 use bevy::math::*;
 use gltf;
 
-pub fn create_bvh_from_gltf(path: &str) -> bvh::Bvh {
+pub fn create_bvh_from_gltf(path: &str) -> World {
     let (document, buffer, ..) = gltf::import(path).unwrap();
     let mut triangles = Vec::new();
 
@@ -15,7 +18,7 @@ pub fn create_bvh_from_gltf(path: &str) -> bvh::Bvh {
         }
     }
 
-    baking::build_bvh(triangles)
+    World::new(baking::build_bvh(triangles))
 }
 
 pub fn load_recursive(node: &gltf::Node, buffers: &[gltf::buffer::Data], triangles: &mut Vec<Triangle>) {

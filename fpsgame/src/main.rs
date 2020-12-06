@@ -7,13 +7,11 @@ mod physics;
 mod math;
 
 fn main() {
-    let now = std::time::Instant::now();
-    let bvh = physics::create_bvh_from_gltf("./assets/physics/test.glb");
-    println!("building bvh took {:?}, tree has a complexity of {}", now.elapsed(), bvh.calculate_cost());
+    let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
 
     App::build()
         .add_resource(Msaa { samples: 4 })
-        .add_resource(bvh)
+        .add_resource(world)
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin)
         .add_plugin(RapierRenderPlugin)
@@ -145,20 +143,13 @@ fn update_camera(
     }
 }
 
-fn raycast(bvh: Res<crate::physics::bvh::Bvh>, player_query: Query<(&Player, &Transform)>) {
+fn raycast(world: Res<crate::physics::World>, player_query: Query<(&Player, &Transform)>) {
     
     for (_, transform) in player_query.iter() {
         let ray = math::Ray::new(transform.translation, -Vec3::unit_y(), std::f32::INFINITY);
 
-        let intersections = bvh.intersects(&ray);
-        if intersections.len() == 0 {
-            continue;
+        if let Some(intersection) = world.raycast(&ray) {
+            dbg!(intersection);
         }
-
-        let t = intersections.iter().fold(std::f32::INFINITY, |a, i| a.min(i.t));
-        let p = ray.get_point(t);
-
-        dbg!(p);
     }
-
 }

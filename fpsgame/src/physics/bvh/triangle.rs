@@ -29,6 +29,14 @@ impl Triangle {
         let edge1 = self.b - self.a;
         let edge2 = self.c - self.a;
 
+        let normal = edge1.cross(edge2).normalize();
+        // TODO I hope this is correct..
+        let normal = if normal.dot(ray.direction) >= 0.0 {
+            -normal
+        } else {
+            normal
+        };
+
         let h = ray.direction.cross(edge2);
         let a = edge1.dot(h);
 
@@ -51,8 +59,13 @@ impl Triangle {
         }
 
         let t = f * edge2.dot(q);
+
+        if t > ray.length {
+            return None;
+        }
+
         if t > std::f32::EPSILON {
-            return Some(Intersection::new(t));
+            return Some(Intersection::new(t, ray.get_point(t), normal));
         }
         
         return None;
