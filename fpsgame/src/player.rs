@@ -2,6 +2,18 @@
 pub struct Player {
     pub yaw: f32,
     pub pitch: f32,
+
+    /// Total height of the player
+    pub height: f32,
+
+    /// Height offset at which the camera is placed
+    pub camera_height: f32,
+
+    /// Height offset from which raycasts to the ground are made
+    pub raycast_offset: f32,
+
+    /// True if the player is standing on solid ground
+    pub grounded: bool,
 }
 
 impl Player {
@@ -9,6 +21,12 @@ impl Player {
         Self { // <- implicit return because no semicolon
             yaw, // <- this is the short form of `yaw: yaw,`
             pitch,
+
+            height: 1.6,
+            camera_height: 1.5,
+            raycast_offset: 1.0,
+
+            grounded: false,
         }
     }
 
