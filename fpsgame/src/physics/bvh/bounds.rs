@@ -22,7 +22,8 @@ impl Bounds {
     }
 
     pub fn intersects(&self, ray: &Ray) -> bool {
-        todo!() // TODO implement AABB-ray intersection
+        // TODO implement AABB-ray intersection
+        true
     }
 
     pub fn join(&self, other: &Self) -> Self {

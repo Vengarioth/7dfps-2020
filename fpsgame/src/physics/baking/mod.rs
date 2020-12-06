@@ -85,6 +85,18 @@ fn build_recursive(triangles: &[Triangle], triangle_bounds: &[Bounds], primitive
                 },
             }
 
+            // TODO sometimes this sorting fails on very small triangles with similar centroids
+            if left.len() == 0 {
+                while right.len() >= left.len() {
+                    left.push(right.remove(0));
+                }
+            }
+            if right.len() == 0 {
+                while left.len() >= right.len() {
+                    right.push(left.remove(0));
+                }
+            }
+
             let (left, _) = build_recursive(triangles, triangle_bounds, &left, nodes);
             let (right, _) = build_recursive(triangles, triangle_bounds, &right, nodes);
 
