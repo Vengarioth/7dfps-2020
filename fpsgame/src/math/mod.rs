@@ -92,24 +92,40 @@ mod tests {
 
     #[test]
     fn test_arithmetics() {
-        let input1 = IVec2 {
+        let vec2_input1 = IVec2 {
             x: 2,
             y: 2,
         };
-        let input2 = IVec2 {
+        let vec2_input2 = IVec2 {
             x: 2,
             y: 2,
         };
-        assert_eq!(input1+input2, IVec2 { x: 4, y: 4 });
-        assert_eq!(input1-input2, IVec2 { x: 0, y: 0 });
-        assert_eq!(input1*2, IVec2 { x: 4, y: 4 });
-        assert_eq!(input1/2, IVec2 { x: 1, y: 1 });
+        let vec3_input1 = IVec3 {
+            x: 2,
+            y: 2,
+            z: 2,
+        };
+        let vec3_input2 = IVec3 {
+            x: 2,
+            y: 2,
+            z: 2,
+        };
+        assert_eq!(vec2_input1+vec2_input2, IVec2 { x: 4, y: 4 });
+        assert_eq!(vec2_input1-vec2_input2, IVec2 { x: 0, y: 0 });
+        assert_eq!(vec2_input1*2, IVec2 { x: 4, y: 4 });
+        assert_eq!(vec2_input1/2, IVec2 { x: 1, y: 1 });
+
+        assert_eq!(vec3_input1+vec3_input2, IVec3 { x: 4, y: 4, z: 4 });
+        assert_eq!(vec3_input1-vec3_input2, IVec3 { x: 0, y: 0, z: 0 });
+        assert_eq!(vec3_input1*2, IVec3 { x: 4, y: 4, z: 4 });
+        assert_eq!(vec3_input1/2, IVec3 { x: 1, y: 1, z: 1 });
     }
 
     #[test]
     #[should_panic]
-    fn test_divide_by_zero() {
-        let exp = IVec2 { x: 1, y: 1 }/0;
+    fn test_divide_by_zero_should_panic() {
+        let _exp = IVec2 { x: 1, y: 1 }/0;
+        let _exp = IVec3 { x: 1, y: 1, z: 1 }/0;
     }
 
     #[test]
