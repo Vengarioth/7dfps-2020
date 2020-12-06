@@ -1,14 +1,25 @@
-use bevy::{render::camera::Camera, input::mouse::MouseMotion, prelude::*};
+use bevy::{input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
 
 mod player;
 mod physics;
 mod math;
+mod game_state;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
 
     App::build()
+        .add_resource(WindowDescriptor {
+            width: 1920,
+            height: 1080,
+            vsync: true,
+            title: "Pet Tower Defense".to_string(),
+            cursor_visible: false,
+            cursor_locked: true,
+            mode: WindowMode::BorderlessFullscreen,
+            ..Default::default()
+        })
         .add_resource(Msaa { samples: 4 })
         .add_resource(world)
         .add_plugins(DefaultPlugins)
@@ -16,6 +27,7 @@ fn main() {
         .add_system(update_look_direction.system())
         .add_system(move_player.system())
         .add_system(update_camera.system())
+        .add_system(game_state::toggle_cursor_and_exit.system())
         .run();
 }
 
