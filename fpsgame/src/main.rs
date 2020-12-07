@@ -28,6 +28,7 @@ fn main() {
         .add_system(move_player.system())
         .add_system(update_camera.system())
         .add_system(game_state::toggle_cursor_and_exit.system())
+        .add_system(player::update_trauma.system())
         .run();
 }
 
@@ -135,17 +136,21 @@ fn update_camera(
     mut camera_query: Query<(&Camera, &mut Transform)>,
 ) {
     for (player, player_transform) in player_query.iter() {
+        let combined_yaw = player.yaw + player.trauma_yaw;
+        let combined_pitch = player.pitch + player.trauma_pitch;
+        // let combined_roll = player.roll + player.trauma_roll;
+
         let direction = Vec3::new(0.0, 0.0, 1.0);
         let direction = Vec3::new(
             direction.x(),
-            direction.y() * player.pitch.cos() - direction.z() * player.pitch.sin(),
-            direction.z() * player.pitch.cos() - direction.y() * player.pitch.sin(),
+            direction.y() * combined_pitch.cos() - direction.z() * combined_pitch.sin(),
+            direction.z() * combined_pitch.cos() - direction.y() * combined_pitch.sin(),
         );
 
         let direction = Vec3::new(
-            direction.x() * player.yaw.cos() - direction.z() * player.yaw.sin(),
+            direction.x() * combined_yaw.cos() - direction.z() * combined_yaw.sin(),
             direction.y(),
-            direction.z() * player.yaw.cos() - direction.x() * player.yaw.sin(),
+            direction.z() * combined_yaw.cos() - direction.x() * combined_yaw.sin(),
         );
 
         let direction = direction.normalize();

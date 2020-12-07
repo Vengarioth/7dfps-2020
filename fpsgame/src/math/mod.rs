@@ -141,6 +141,28 @@ pub fn radians_to_degrees(radians: f32) -> f32 {
     (radians / std::f32::consts::PI) * 180f32
 }
 
+pub fn min<T:PartialOrd>(a: T, b: T) -> T {
+    if a >= b { b } else { a }
+}
+
+pub fn max<T:PartialOrd>(a: T, b: T) -> T {
+    if a >= b { a } else { b }
+}
+
+trait Clamp {
+    fn clamp(self, min: Self, max: Self) -> Self;
+}
+
+impl Clamp for f32 {
+    fn clamp(self, min: Self, max: Self) -> Self {
+        match (self<min, self>max) {
+            (true, _) => min,
+            (_, true) => max,
+            _ => self,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
