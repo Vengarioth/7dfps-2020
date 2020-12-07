@@ -1,5 +1,6 @@
 use bevy::{input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
+use winit::{event_loop::EventLoop, dpi::PhysicalSize};
 
 mod player;
 mod physics;
@@ -8,18 +9,41 @@ mod game_state;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
+    let screen_size = get_primary_physical_size();
+    let mut app_builder = App::build();
 
-    App::build()
-        .add_resource(WindowDescriptor {
-            width: 1920,
-            height: 1080,
-            vsync: true,
-            title: "Pet Tower Defense".to_string(),
-            cursor_visible: false,
-            cursor_locked: true,
-            mode: WindowMode::BorderlessFullscreen,
-            ..Default::default()
-        })
+    match screen_size
+    {
+        //if we found the screen size then use it and do borderless fullscreen
+        Some(screen_size) => {
+            app_builder.add_resource(WindowDescriptor {
+                width: screen_size.width,
+                height: screen_size.height,
+                vsync: true,
+                title: "Pet Tower Defense".to_string(),
+                cursor_visible: false,
+                cursor_locked: true,
+                mode: WindowMode::BorderlessFullscreen,
+                ..Default::default()
+            });
+        },
+        //if we didn't find a screen size, then we do windowed
+        None => {
+            println!("No primary monitor detected. Using 800x600 Windowed");
+            app_builder.add_resource(WindowDescriptor {
+                width: 800,
+                height: 600,
+                vsync: true,
+                title: "Pet Tower Defense".to_string(),
+                cursor_visible: false,
+                cursor_locked: true,
+                mode: WindowMode::Windowed,
+                resizable:true,
+                ..Default::default()
+            });
+        }
+    }
+    app_builder
         .add_resource(Msaa { samples: 4 })
         .add_resource(world)
         .add_plugins(DefaultPlugins)
@@ -53,7 +77,27 @@ fn setup(
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
         })
-        .spawn((Player::new(4.012901, 0.3168293), Transform::from_translation(Vec3::new(-3.1755996, 5.0, 2.4332705))));
+        .spawn((
+            Player::new(4.012901, 0.3168293), 
+            Transform::from_translation(Vec3::new(-3.1755996, 5.0, 2.4332705))
+        )
+    );
+}
+
+//TODO: Test this on not-windows
+fn get_primary_physical_size() -> Option<PhysicalSize<u32>> {
+    let mut size: PhysicalSize<u32> = PhysicalSize::new(1920, 1080);
+    let event_loop = EventLoop::new();
+    match event_loop.primary_monitor() {
+        Some(monitor) => {
+            size.width = monitor.size().width;
+            size.height = monitor.size().height;
+            return Some(size);
+        },
+        None => {
+            return None;
+        }
+    };
 }
 
 #[derive(Default)]
