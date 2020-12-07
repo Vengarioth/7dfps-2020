@@ -7,6 +7,7 @@ const TRAUMA_MIN: f32 = 0.0;
 const TRAUMA_MAX: f32 = 1.0;
 const TRAUMA_POWER: f32 = 2.0;
 const TRAUMA_DECAY: f32 = 2.0;
+const PERLIN_SAMPLE_SIZE: f64 = 10.0;
 const MAX_YAW_IN_RAD: f32 = 0.2; // maximum amount of yaw rotation when shaking 
 const MAX_PITCH_IN_RAD: f32 = 0.1; // maximum amount of pitch rotation when shaking 
 const MAX_ROLL_IN_RAD: f32 = 0.1; // maximum amount of roll rotation when shaking 
@@ -60,6 +61,7 @@ impl Player {
     }
 
     pub fn add_trauma(&mut self, amount: f32) {
+        if amount > TRAUMA_MAX { println!("Trauma amount added was greater than {} and was clamped to {}", TRAUMA_MAX, TRAUMA_MAX) };
         self.trauma += min(TRAUMA_MAX, self.trauma+amount);
         self.trauma = self.trauma.clamp(0.0, 1.0);
     }
@@ -67,9 +69,9 @@ impl Player {
     pub fn shake_camera(&mut self, secs_since_startup: f64) {
         let shake = self.trauma.powf(TRAUMA_POWER); // the amount of shake depending on the amount of trauma 
         let perlin = Perlin::new();
-        let perlin_noise_yaw = perlin.get([1.0, secs_since_startup*5.0]) as f32;
-        let perlin_noise_pitch = perlin.get([2.0, secs_since_startup*5.0]) as f32;
-        let perlin_noise_roll = perlin.get([3.0, secs_since_startup*5.0]) as f32;
+        let perlin_noise_yaw = perlin.get([1.0, secs_since_startup*PERLIN_SAMPLE_SIZE]) as f32;
+        let perlin_noise_pitch = perlin.get([2.0, secs_since_startup*PERLIN_SAMPLE_SIZE]) as f32;
+        let perlin_noise_roll = perlin.get([3.0, secs_since_startup*PERLIN_SAMPLE_SIZE]) as f32;
         self.trauma_yaw = MAX_YAW_IN_RAD * shake * perlin_noise_yaw;
         self.trauma_pitch = MAX_PITCH_IN_RAD * shake * perlin_noise_pitch;
         self.trauma_roll = MAX_ROLL_IN_RAD * shake * perlin_noise_roll;
