@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 bevy = "0.3"
 gltf = "0.15"
+once_cell = "1.5.2"

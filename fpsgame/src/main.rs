@@ -1,10 +1,12 @@
 use bevy::{input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
+use util::draw_primitives::*;
 
 mod player;
 mod physics;
 mod math;
 mod game_state;
+mod util;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
@@ -24,10 +26,13 @@ fn main() {
         .add_resource(world)
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
+        .add_startup_system(setup_primitives.system())
         .add_system(update_look_direction.system())
         .add_system(move_player.system())
         .add_system(update_camera.system())
+        .add_system(player_trail_test.system()) //this is just for demonstration and may be removed
         .add_system(game_state::toggle_cursor_and_exit.system())
+        .add_system(util::draw_primitives::update_primitives.system())
         .run();
 }
 
@@ -127,6 +132,16 @@ fn move_player(
         }
 
         transform.translation += player_move;
+    }
+}
+
+///only for line drawing demo, can be removed
+fn player_trail_test(
+    mut last_translation: Local<Vec3>,
+    query: Query<(&Player, &Transform)>,) {
+    for (_, tf) in query.iter() {
+        let line = (*last_translation, tf.translation);
+        *last_translation = draw_line_for(line, 100).1;
     }
 }
 
