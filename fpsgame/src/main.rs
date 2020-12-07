@@ -1,10 +1,13 @@
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
+use util::draw_primitives::*;
 
 mod player;
 mod physics;
 mod math;
 mod game_state;
+mod util;
+mod movement;
 
 struct MainCamera;
 
@@ -28,11 +31,14 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup.system())
+        .add_startup_system(setup_primitives.system())
         .add_system(update_look_direction.system())
         .add_system(move_player.system())
         .add_system(update_camera.system())
+        //.add_system(player_trail_test.system()) //this is just for demonstration and may be removed
         .add_system(game_state::toggle_cursor_and_exit.system())
         .add_system(text_update_system.system())
+        .add_system(util::draw_primitives::update_primitives.system())
         .run();
 }
 
@@ -148,6 +154,8 @@ fn move_player(
         let ray = math::Ray::new(transform.translation + (Vec3::unit_y() * player.raycast_offset), -Vec3::unit_y(), 2.0);
         if let Some(intersection) = world.raycast(&ray) {
 
+            // util::draw_primitives::draw_line_for((intersection.position, intersection.position + intersection.normal), 120);
+
             let height = intersection.t - player.raycast_offset;
             if height < 0.01 {
                 transform.translation += Vec3::unit_y() * (-height - 0.01);
@@ -181,6 +189,16 @@ fn move_player(
     }
 }
 
+///only for line drawing demo, can be removed
+fn player_trail_test(
+    mut last_translation: Local<Vec3>,
+    query: Query<(&Player, &Transform)>,) {
+    for (_, tf) in query.iter() {
+        let line = (*last_translation, tf.translation);
+        *last_translation = draw_line_for(line, 100).1;
+    }
+}
+
 fn update_camera(
     player_query: Query<(&Player, &Transform)>,
     mut camera_query: Query<(&MainCamera, &Camera, &mut Transform)>,
@@ -210,14 +228,12 @@ fn update_camera(
 
 // A unit struct to help identify the FPS UI component, since there may be many Text components
 struct FpsText;
-fn text_update_system(diagnostics: Res<bevy::diagnostic::Diagnostics>, mut query: Query<(&mut Text, &FpsText)>, player_query: Query<&Player>) {
-
-    let player = player_query.iter().next().unwrap();
-
+fn text_update_system(diagnostics: Res<bevy::diagnostic::Diagnostics>, mut query: Query<(&mut Text, &FpsText)>) {
     for (mut text, _tag) in query.iter_mut() {
         if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(average) = fps.average() {
-                text.value = format!("FPS: {:.2}, WG: {}, G: {}, WS: {}, S: {}, {}", average, player.was_grounded, player.grounded, player.was_on_slope, player.on_slope, player.frames_since_grounded);
+                // text.value = format!("FPS: {:.2}", average);
+                dbg!(average);
             }
         }
     }
