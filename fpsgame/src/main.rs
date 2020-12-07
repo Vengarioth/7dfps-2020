@@ -1,16 +1,42 @@
 use bevy::{input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
+use command_line_args::*;
+use std::*;
 
 mod player;
 mod physics;
 mod math;
 mod game_state;
+mod command_line_args;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
+    let mut arg_vec:Vec<String> = Vec::new();
+    for argument in env::args() {
+        arg_vec.push(argument.to_string());
+    }
+    let command_line_args = CommandLineArgs {
+        args: arg_vec
+    };
 
-    App::build()
-        .add_resource(WindowDescriptor {
+    let mut app_builder = App::build();
+
+    if command_line_args.has_arg("windowed".to_string())
+    {
+        app_builder.add_resource(WindowDescriptor {
+            width: 800,
+            height: 600,
+            vsync: true,
+            title: "Pet Tower Defense".to_string(),
+            cursor_visible: false,
+            cursor_locked: true,
+            mode: WindowMode::Windowed,
+            ..Default::default()
+        });
+    }
+    else
+    {
+        app_builder.add_resource(WindowDescriptor {
             width: 1920,
             height: 1080,
             vsync: true,
@@ -19,9 +45,13 @@ fn main() {
             cursor_locked: true,
             mode: WindowMode::BorderlessFullscreen,
             ..Default::default()
-        })
+        });
+    }
+    
+    app_builder
         .add_resource(Msaa { samples: 4 })
         .add_resource(world)
+        .add_resource(command_line_args)
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(update_look_direction.system())
@@ -79,6 +109,7 @@ fn update_look_direction(
 }
 
 fn move_player(
+    command_line_args: Res<CommandLineArgs>,
     keyboard_input: Res<Input<KeyCode>>,
     world: Res<crate::physics::World>,
     mut player_query: Query<(&Player, &mut Transform)>,
@@ -101,6 +132,11 @@ fn move_player(
     }
     if keyboard_input.pressed(KeyCode::LShift) {
          player_move += Vec3::new(0.0, -1.0, 0.0);
+    }
+    
+    if keyboard_input.just_pressed(KeyCode::T) && command_line_args.has_arg("debug".to_string())
+    {
+        println!("Debug!");
     }
 
     for (player, mut transform) in player_query.iter_mut() {
