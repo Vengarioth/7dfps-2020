@@ -1,14 +1,16 @@
 use bevy::{input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
+use command_line::*;
 
 mod player;
 mod physics;
 mod math;
 mod game_state;
+mod command_line;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
-
+    let opt: Opt = Opt::new();
     App::build()
         .add_resource(WindowDescriptor {
             width: 1920,
@@ -22,6 +24,7 @@ fn main() {
         })
         .add_resource(Msaa { samples: 4 })
         .add_resource(world)
+        .add_resource(opt)
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(update_look_direction.system())
