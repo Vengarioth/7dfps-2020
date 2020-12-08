@@ -37,6 +37,7 @@ fn main() {
         .add_system(crate::lifetime::reduce_lifetime.system())
         .add_system(update_look_direction.system())
         .add_system(player::move_player.system())
+        .add_system(player::shake_when_hit_ground.system())
         .add_system(debug_player.system())
         .add_system(crate::movement::integrate_acceleration_velocity.system())
         .add_system(crate::movement::move_entities.system())

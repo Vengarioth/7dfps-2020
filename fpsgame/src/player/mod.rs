@@ -32,7 +32,7 @@ pub fn spawn_player(mut commands: Commands) {
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&Player, &mut Movement)>,
+    mut query: Query<(&mut Player, &mut Movement)>,
 ) {
     let mut player_move = Vec3::default();
     if keyboard_input.pressed(KeyCode::W) {
@@ -54,7 +54,7 @@ pub fn move_player(
          player_move += Vec3::new(0.0, -1.0, 0.0);
     }
 
-    for (player, mut movement) in query.iter_mut() {
+    for (mut player, mut movement) in query.iter_mut() {
         let sin = player.yaw.sin();
         let cos = player.yaw.cos();
 
@@ -67,6 +67,10 @@ pub fn move_player(
         );
 
         movement.0 = player_move;
+
+        if keyboard_input.just_pressed(KeyCode::T) {
+            player.add_trauma(0.5);
+        }
     }
 }
 
@@ -183,5 +187,16 @@ pub fn update_trauma(
             player.trauma = TRAUMA_MIN.max(player.trauma - TRAUMA_DECAY*time.delta_seconds);
             player.shake_camera(time.seconds_since_startup);
         }
+    }
+} 
+
+pub fn shake_when_hit_ground(
+    mut last_grounded: Local<bool>,
+    mut player_query: Query<&mut Player>) {
+    for mut player in player_query.iter_mut() {
+        if !*last_grounded && player.grounded {
+            player.add_trauma(0.5);
+        }
+        *last_grounded = player.grounded;
     }
 } 
