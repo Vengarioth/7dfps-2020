@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::command_line::Opt;
+use crate::command_line::CommandLineOpt;
 
 use crate::movement::{
     Movement,
@@ -33,7 +33,7 @@ pub fn spawn_player(mut commands: Commands) {
 }
 
 pub fn move_player(
-    opt: Res<Opt>,
+    opt: Res<CommandLineOpt>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Player, &mut Movement)>,
 ) {

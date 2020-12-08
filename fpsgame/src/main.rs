@@ -16,7 +16,7 @@ struct MainCamera;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
-    let opt: Opt = Opt::new();
+    let opt: CommandLineOpt = CommandLineOpt::new();
     App::build()
         .add_resource(WindowDescriptor {
             width: 1920,

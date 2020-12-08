@@ -2,7 +2,7 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "example", about = "An example of StructOpt usage.")]
-pub struct Opt {
+pub struct CommandLineOpt {
     /// Activate debug mode
     // short and long flags (-d, --debug) will be deduced from the field's name
     #[structopt(short, long)]
@@ -12,9 +12,9 @@ pub struct Opt {
     windowed: bool,
 }
 
-impl Opt {
+impl CommandLineOpt {
     pub fn new () -> Self {
-        let opt = Opt::from_args();
+        let opt = CommandLineOpt::from_args();
         println!("{:?}", opt);
         opt
     }
