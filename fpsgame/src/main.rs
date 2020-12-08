@@ -90,6 +90,11 @@ fn get_primary_physical_size() -> Option<PhysicalSize<u32>> {
     let event_loop = EventLoop::new();
     match event_loop.primary_monitor() {
         Some(monitor) => {
+            //monitor.scale_factor() is 2.0 on my mac
+            //monitor.size() is 3072, 1920 on my mac, which is physical pixels
+            //WindowDescriptor takes physical pixels as width and height, so
+            //no multiplication/division with scale_factor is necessary
+
             size.width = monitor.size().width;
             size.height = monitor.size().height;
             return Some(size);
