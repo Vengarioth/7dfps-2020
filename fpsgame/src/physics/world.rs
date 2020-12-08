@@ -36,12 +36,12 @@ impl World {
 
     pub fn collide_sphere(&self, sphere: &Sphere) -> Option<PrimitiveIntersection> {
         let bounds = sphere.get_bounds();
-        let mut min_penetration = std::f32::INFINITY;
+        let mut max_penetration = std::f32::NEG_INFINITY;
         let mut best_intersection = None;
         for index in self.bvh.query_bounds(&bounds) {
             if let Some(intersection) = sphere.intersects_triangle(self.bvh.get_primitive(index)) {
-                if intersection.penetration_depth < min_penetration {
-                    min_penetration = intersection.penetration_depth;
+                if intersection.penetration_depth > max_penetration {
+                    max_penetration = intersection.penetration_depth;
                     best_intersection = Some(intersection);
                 }
             }

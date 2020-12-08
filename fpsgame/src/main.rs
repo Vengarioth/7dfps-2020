@@ -33,11 +33,13 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup.system())
         .add_startup_system(setup_primitives.system())
+        .add_startup_system(player::spawn_player.system())
         .add_system(crate::lifetime::reduce_lifetime.system())
         .add_system(update_look_direction.system())
-        .add_system(move_player.system())
+        .add_system(player::move_player.system())
         .add_system(crate::movement::integrate_acceleration_velocity.system())
         .add_system(crate::movement::move_entities.system())
+        .add_system(crate::movement::move_kinematic_entities.system())
         .add_system(update_camera.system())
         //.add_system(player_trail_test.system()) //this is just for demonstration and may be removed
         .add_system(game_state::toggle_cursor_and_exit.system())
@@ -55,11 +57,6 @@ fn setup(
 ) {
     commands
         .spawn_scene(asset_server.load("physics/test.glb"))
-        .spawn(PbrComponents {
-            mesh: meshes.add(Mesh::from(shape::Plane { size: 10.0 })),
-            material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
-            ..Default::default()
-        })
         .spawn(LightComponents {
             transform: Transform::from_translation(Vec3::new(4.0, 8.0, 4.0)),
             ..Default::default()
@@ -69,9 +66,7 @@ fn setup(
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
         })
-        .with(MainCamera)
-        .spawn((Player::new(4.012901, 0.3168293), Transform::from_translation(Vec3::new(-3.1755996, 5.0, 2.4332705))));
-
+        .with(MainCamera);
     commands
         .spawn(UiCameraComponents::default())
         .spawn(TextComponents {

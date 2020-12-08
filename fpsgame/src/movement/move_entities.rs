@@ -3,6 +3,9 @@ use bevy::prelude::*;
 use crate::physics::Sphere;
 
 #[derive(Debug, Default, Clone)]
+pub struct Kinematic;
+
+#[derive(Debug, Default, Clone)]
 pub struct Acceleration(pub Vec3);
 
 
@@ -71,4 +74,38 @@ pub fn move_entities(world: Res<crate::physics::World>, mut entities: Query<(&Mo
             length -= mag;
         }
     }
+}
+
+
+pub fn move_kinematic_entities(world: Res<crate::physics::World>, mut entities: Query<(&Kinematic, &MovementData, &mut Movement, &mut GroundedState, &mut Transform)>) {
+    for (_, movement_data, mut movement, grounded_state, mut transform) in entities.iter_mut() {
+
+        /*
+        let vertical_movement = movement.0.y();
+        let horizontal_movement = Vec3::new(movement.0.x(), 0.0, movement.0.z());
+        movement.0 = Vec3::zero();
+
+        if vertical_movement > std::f32::EPSILON {
+            // do vertical movement first if going up
+            move_vertical(vertical_movement, &world, &mut transform);
+            move_horizontal(horizontal_movement, &world, &mut transform);
+        } else {
+            // do horizontal movement first if going down
+            move_horizontal(horizontal_movement, &world, &mut transform);
+            move_vertical(vertical_movement, &world, &mut transform);
+        }
+        */
+
+        move_all(movement.0, &world, &mut transform);
+        movement.0 = Vec3::zero();
+    }
+}
+
+fn move_all(mut movement: Vec3, world: &crate::physics::World, transform: &mut Transform) {
+    if let Some(intersection) = world.collide_sphere(&Sphere::new(transform.translation, 1.0)) {
+        movement += intersection.penetration_normal * intersection.penetration_depth;
+        crate::util::draw_primitives::draw_line_for((intersection.position, intersection.position + intersection.surface_normal), 60);
+    }
+
+    transform.translation += movement;
 }

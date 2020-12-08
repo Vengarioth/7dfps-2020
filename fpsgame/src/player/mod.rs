@@ -1,4 +1,61 @@
-use bevy::math::*;
+use bevy::prelude::*;
+use crate::movement::{
+    Movement,
+    MovementData,
+    Kinematic,
+    GroundedState,
+};
+
+pub fn spawn_player(mut commands: Commands) {
+    commands.spawn((
+        Player::new(4.012901, 0.3168293),
+        Transform::from_translation(Vec3::new(-3.1755996, 5.0, 2.4332705)),
+        Movement(Vec3::zero()),
+        MovementData::default(), // TODO
+        GroundedState::default(),
+        Kinematic,
+    ));
+}
+
+pub fn move_player(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Player, &mut Movement)>,
+) {
+    let mut player_move = Vec3::default();
+    if keyboard_input.pressed(KeyCode::W) {
+         player_move += Vec3::new(0.0, 0.0, 1.0);
+    }
+    if keyboard_input.pressed(KeyCode::A) {
+         player_move += Vec3::new(1.0, 0.0, 0.0);
+    }
+    if keyboard_input.pressed(KeyCode::S) {
+         player_move += Vec3::new(0.0, 0.0, -1.0);
+    }
+    if keyboard_input.pressed(KeyCode::D) {
+         player_move += Vec3::new(-1.0, 0.0, 0.0);
+    }
+    if keyboard_input.pressed(KeyCode::Space) {
+         player_move += Vec3::new(0.0, 1.0, 0.0);
+    }
+    if keyboard_input.pressed(KeyCode::LShift) {
+         player_move += Vec3::new(0.0, -1.0, 0.0);
+    }
+
+    for (player, mut movement) in query.iter_mut() {
+        let sin = player.yaw.sin();
+        let cos = player.yaw.cos();
+
+        player_move *= 0.016 * 10.0;
+
+        let player_move = Vec3::new(
+            player_move.x() * cos - player_move.z() * sin,
+            player_move.y(),
+            player_move.z() * cos + player_move.x() * sin,
+        );
+
+        movement.0 = player_move;
+    }
+}
 
 #[derive(Debug)]
 pub struct Player {
