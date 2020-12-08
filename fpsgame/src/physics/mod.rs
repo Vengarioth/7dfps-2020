@@ -1,8 +1,14 @@
 pub mod bvh;
 mod baking;
 mod world;
+mod capsule;
+mod util;
+mod sphere;
+mod primitive_intersection;
 
 pub use world::*;
+pub use primitive_intersection::*;
+pub use sphere::*;
 
 use self::bvh::Triangle;
 use bevy::math::*;

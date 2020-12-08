@@ -1,4 +1,4 @@
-use super::bvh::{Bvh, Intersection};
+use super::{PrimitiveIntersection, Sphere, bvh::{Bvh, Intersection}};
 use crate::math::Ray;
 
 pub struct World {
@@ -32,5 +32,21 @@ impl World {
         });
 
         return Some(intersections.remove(index));
+    }
+
+    pub fn collide_sphere(&self, sphere: &Sphere) -> Option<PrimitiveIntersection> {
+        let bounds = sphere.get_bounds();
+        let mut min_penetration = std::f32::INFINITY;
+        let mut best_intersection = None;
+        for index in self.bvh.query_bounds(&bounds) {
+            if let Some(intersection) = sphere.intersects_triangle(self.bvh.get_primitive(index)) {
+                if intersection.penetration_depth < min_penetration {
+                    min_penetration = intersection.penetration_depth;
+                    best_intersection = Some(intersection);
+                }
+            }
+        }
+
+        best_intersection
     }
 }

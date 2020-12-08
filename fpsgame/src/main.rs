@@ -1,7 +1,8 @@
-use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, input::keyboard::KeyCode, input::mouse::MouseMotion, prelude::*, render::camera::Camera, window::WindowMode};
+use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, input::keyboard::KeyCode, input::{ElementState, mouse::{MouseButtonInput, MouseMotion}}, prelude::*, render::camera::Camera, window::WindowMode};
 use player::Player;
 use util::draw_primitives::*;
 
+mod lifetime;
 mod player;
 mod physics;
 mod math;
@@ -32,13 +33,17 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup.system())
         .add_startup_system(setup_primitives.system())
+        .add_system(crate::lifetime::reduce_lifetime.system())
         .add_system(update_look_direction.system())
         .add_system(move_player.system())
+        .add_system(crate::movement::integrate_acceleration_velocity.system())
+        .add_system(crate::movement::move_entities.system())
         .add_system(update_camera.system())
         //.add_system(player_trail_test.system()) //this is just for demonstration and may be removed
         .add_system(game_state::toggle_cursor_and_exit.system())
-        .add_system(text_update_system.system())
+        // .add_system(text_update_system.system())
         .add_system(util::draw_primitives::update_primitives.system())
+        .add_system(crate::lifetime::remove_entities_based_on_lifetime.system())
         .run();
 }
 
@@ -89,12 +94,14 @@ fn setup(
 
 #[derive(Default)]
 struct State {
+    mouse_button_event_reader: EventReader<MouseButtonInput>,
     mouse_motion_event_reader: EventReader<MouseMotion>,
 }
 
 fn update_look_direction(
     mut state: Local<State>,
     time: Res<Time>,
+    mouse_button_events: Res<Events<MouseButtonInput>>,
     mouse_motion_events: Res<Events<MouseMotion>>,
     mut player_query: Query<&mut Player>,
 ) {
@@ -103,16 +110,28 @@ fn update_look_direction(
         mouse_delta += event.delta * time.delta_seconds * 0.1;
     }
 
+    let mut pressed = false;
+    for event in state.mouse_button_event_reader.iter(&mouse_button_events) {
+        if event.button == MouseButton::Left && event.state == ElementState::Pressed {
+            pressed = true;
+        }
+    }
+
     for mut player in player_query.iter_mut() {
         player.yaw += mouse_delta.x();
         player.pitch += mouse_delta.y();
 
         player.pitch = player.pitch.min((0.5 * std::f32::consts::PI) - 0.01);
         player.pitch = player.pitch.max(-((0.5 * std::f32::consts::PI) - 0.01));
+
+        player.action = pressed;
     }
 }
 
 fn move_player(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     keyboard_input: Res<Input<KeyCode>>,
     world: Res<crate::physics::World>,
     mut player_query: Query<(&mut Player, &mut Transform)>,
@@ -186,6 +205,28 @@ fn move_player(
         } else {
             player.frames_since_grounded += 1;
         }
+
+        // DEBUG raycast normal
+        let pos = transform.translation + Vec3::new(0.0, player.camera_height, 0.0);
+        let look = player.get_look_direction();
+        let ray = crate::math::Ray::new(pos, look, std::f32::INFINITY);
+        if let Some(intersection) = world.raycast(&ray) {
+            crate::util::draw_primitives::draw_line_for((intersection.position, intersection.position + intersection.normal), 1);
+        }
+
+        // DEBUG spawn sphere
+        if player.action {
+            commands.spawn(PbrComponents {
+                mesh: meshes.add(Mesh::from(shape::Icosphere { radius: 0.2, subdivisions: 3, })),
+                material: materials.add(Color::rgb(0.5, 0.5, 0.5).into()),
+                transform: Transform::from_translation(pos),
+                ..Default::default()
+            }).with_bundle(crate::movement::MovementComponents {
+                acceleration: crate::movement::Acceleration(look * 100.0),
+                ..Default::default()
+            })
+            .with(crate::lifetime::Lifetime(120));
+        }
     }
 }
 
@@ -204,20 +245,7 @@ fn update_camera(
     mut camera_query: Query<(&MainCamera, &Camera, &mut Transform)>,
 ) {
     for (player, player_transform) in player_query.iter() {
-        let direction = Vec3::new(0.0, 0.0, 1.0);
-        let direction = Vec3::new(
-            direction.x(),
-            direction.y() * player.pitch.cos() - direction.z() * player.pitch.sin(),
-            direction.z() * player.pitch.cos() - direction.y() * player.pitch.sin(),
-        );
-
-        let direction = Vec3::new(
-            direction.x() * player.yaw.cos() - direction.z() * player.yaw.sin(),
-            direction.y(),
-            direction.z() * player.yaw.cos() - direction.x() * player.yaw.sin(),
-        );
-
-        let direction = direction.normalize();
+        let direction = player.get_look_direction();
 
         for (_, _, mut transform) in camera_query.iter_mut() {
             let camera_position = player_transform.translation + (Vec3::unit_y() * player.camera_height);
@@ -233,7 +261,7 @@ fn text_update_system(diagnostics: Res<bevy::diagnostic::Diagnostics>, mut query
         if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(average) = fps.average() {
                 // text.value = format!("FPS: {:.2}", average);
-                dbg!(average);
+                // dbg!(average);
             }
         }
     }

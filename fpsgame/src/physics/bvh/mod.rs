@@ -47,6 +47,38 @@ impl Bvh {
         }
     }
 
+    // TODO move primitives/triangles into world
+    pub fn get_primitive(&self, index: usize) -> &Triangle {
+        &self.triangles[index]
+    }
+
+    pub fn query_bounds(&self, query: &Bounds) -> Vec<usize> {
+        let mut stack = Vec::new();
+        let mut primitives = Vec::new();
+
+        if let Some(root) = self.root {
+            stack.push(root);
+        }
+
+        while let Some(index) = stack.pop() {
+            match &self.nodes[index] {
+                BvhNode::Branch { bounds, left, right } => {
+                    if bounds.overlaps(query) {
+                        stack.push(*left);
+                        stack.push(*right);
+                    }
+                },
+                BvhNode::Leaf { bounds, primitive } => {
+                    if bounds.overlaps(query) {
+                        primitives.push(*primitive)
+                    }
+                },
+            }
+        }
+
+        primitives
+    }
+
     pub fn intersects(&self, ray: &Ray) -> Vec<Intersection> {
         let mut intersections = Vec::new();
         if let Some(root) = self.root {

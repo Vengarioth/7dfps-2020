@@ -1,7 +1,12 @@
+use bevy::math::*;
+
 #[derive(Debug)]
 pub struct Player {
     pub yaw: f32,
     pub pitch: f32,
+
+    /// Werether to activate the current action or not
+    pub action: bool,
 
     /// Total height of the player
     pub height: f32,
@@ -31,6 +36,8 @@ impl Player {
             yaw, // <- this is the short form of `yaw: yaw,`
             pitch,
 
+            action: false,
+
             height: 1.6,
             camera_height: 1.5,
             raycast_offset: 1.0,
@@ -41,5 +48,22 @@ impl Player {
             on_slope: false,
             was_on_slope: false,
         }
+    }
+
+    pub fn get_look_direction(&self) -> Vec3 {
+        let direction = Vec3::new(0.0, 0.0, 1.0);
+        let direction = Vec3::new(
+            direction.x(),
+            direction.y() * self.pitch.cos() - direction.z() * self.pitch.sin(),
+            direction.z() * self.pitch.cos() - direction.y() * self.pitch.sin(),
+        );
+
+        let direction = Vec3::new(
+            direction.x() * self.yaw.cos() - direction.z() * self.yaw.sin(),
+            direction.y(),
+            direction.z() * self.yaw.cos() - direction.x() * self.yaw.sin(),
+        );
+
+        direction.normalize()
     }
 }
