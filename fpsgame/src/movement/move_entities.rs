@@ -79,23 +79,6 @@ pub fn move_entities(world: Res<crate::physics::World>, mut entities: Query<(&Mo
 
 pub fn move_kinematic_entities(world: Res<crate::physics::World>, mut entities: Query<(&Kinematic, &MovementData, &mut Movement, &mut GroundedState, &mut Transform)>) {
     for (_, movement_data, mut movement, grounded_state, mut transform) in entities.iter_mut() {
-
-        /*
-        let vertical_movement = movement.0.y();
-        let horizontal_movement = Vec3::new(movement.0.x(), 0.0, movement.0.z());
-        movement.0 = Vec3::zero();
-
-        if vertical_movement > std::f32::EPSILON {
-            // do vertical movement first if going up
-            move_vertical(vertical_movement, &world, &mut transform);
-            move_horizontal(horizontal_movement, &world, &mut transform);
-        } else {
-            // do horizontal movement first if going down
-            move_horizontal(horizontal_movement, &world, &mut transform);
-            move_vertical(vertical_movement, &world, &mut transform);
-        }
-        */
-
         move_all(movement.0, &world, &mut transform);
         movement.0 = Vec3::zero();
     }
