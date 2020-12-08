@@ -21,6 +21,12 @@ impl Bounds {
         self.min + ((self.max - self.min) * 0.5)
     }
 
+    pub fn overlaps(&self, other: &Self) -> bool {
+        self.min.x() <= other.max.x() && self.max.x() >= other.min.x() &&
+        self.min.y() <= other.max.y() && self.max.y() >= other.min.y() &&
+        self.min.z() <= other.max.z() && self.max.z() >= other.min.z()
+    }
+
     pub fn intersects(&self, ray: &Ray) -> bool {
         #[inline(always)]
         fn min_max(min: f32, max: f32, origin: f32, direction: f32) -> (f32, f32) {

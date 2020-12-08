@@ -4,9 +4,9 @@ use super::{Bounds, Intersection};
 
 #[derive(Debug)]
 pub struct Triangle {
-    a: Vec3,
-    b: Vec3,
-    c: Vec3,
+    pub a: Vec3,
+    pub b: Vec3,
+    pub c: Vec3,
 }
 
 impl Triangle {
@@ -16,6 +16,10 @@ impl Triangle {
             b,
             c,
         }
+    }
+
+    pub fn get_normal(&self) -> Vec3 {
+        (self.b - self.a).cross(self.c - self.a).normalize()
     }
 
     pub fn get_bounds(&self) -> Bounds {
