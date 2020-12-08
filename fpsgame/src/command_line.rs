@@ -7,6 +7,9 @@ pub struct Opt {
     // short and long flags (-d, --debug) will be deduced from the field's name
     #[structopt(short, long)]
     debug: bool,
+
+    #[structopt(short, long)]
+    windowed: bool,
 }
 
 impl Opt {
@@ -18,5 +21,9 @@ impl Opt {
     pub fn is_debug(&self) -> bool
     {
         self.debug
+    }
+    pub fn is_windowed(&self) -> bool
+    {
+        self.windowed
     }
 }
