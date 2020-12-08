@@ -1,7 +1,6 @@
 pub mod bvh;
 mod baking;
 mod world;
-mod capsule;
 mod util;
 mod sphere;
 mod primitive_intersection;
