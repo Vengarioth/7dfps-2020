@@ -9,4 +9,9 @@ edition = "2018"
 [dependencies]
 bevy = "0.3"
 gltf = "0.15"
+<<<<<<< HEAD
 structopt = "0.3"
+=======
+noise = "0.6.0"
+once_cell = "1.5.2"
+>>>>>>> 4d058fb87d96b512fc917a6b3679779025ab35a9
