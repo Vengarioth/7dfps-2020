@@ -149,12 +149,13 @@ pub fn max<T:PartialOrd>(a: T, b: T) -> T {
     if a >= b { a } else { b }
 }
 
-trait Clamp {
-    fn clamp(self, min: Self, max: Self) -> Self;
+pub trait Clamp {
+    fn clamp_value(self, min: Self, max: Self) -> Self;
 }
 
 impl Clamp for f32 {
-    fn clamp(self, min: Self, max: Self) -> Self {
+    fn clamp_value(self, min: Self, max: Self) -> Self {
+        assert!(min<=max);
         match (self<min, self>max) {
             (true, _) => min,
             (_, true) => max,

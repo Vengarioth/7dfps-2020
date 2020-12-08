@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use noise::*;
 
-use crate::math::*;
+use crate::math::{*, Clamp};
 
 const TRAUMA_MIN: f32 = 0.0;
 const TRAUMA_MAX: f32 = 1.0;
@@ -61,9 +61,9 @@ impl Player {
     }
 
     pub fn add_trauma(&mut self, amount: f32) {
-        if amount > TRAUMA_MAX { println!("Trauma amount added was greater than {} and was clamped to {}", TRAUMA_MAX, TRAUMA_MAX) };
+        if amount > TRAUMA_MAX { println!("Trauma amount added was greater than {} and was limited to {}.", TRAUMA_MAX, TRAUMA_MAX) };
         self.trauma += min(TRAUMA_MAX, self.trauma+amount);
-        self.trauma = self.trauma.clamp(0.0, 1.0);
+        self.trauma = self.trauma.clamp_value(0.0, 1.0);
     }
 
     pub fn shake_camera(&mut self, secs_since_startup: f64) {
@@ -75,8 +75,8 @@ impl Player {
         self.trauma_yaw = MAX_YAW_IN_RAD * shake * perlin_noise_yaw;
         self.trauma_pitch = MAX_PITCH_IN_RAD * shake * perlin_noise_pitch;
         self.trauma_roll = MAX_ROLL_IN_RAD * shake * perlin_noise_roll;
-        self.trauma_yaw = self.trauma_yaw.clamp(-MAX_YAW_IN_RAD, MAX_YAW_IN_RAD);
-        self.trauma_pitch = self.trauma_pitch.clamp(-MAX_PITCH_IN_RAD, MAX_PITCH_IN_RAD);
+        self.trauma_yaw = self.trauma_yaw.clamp_value(-MAX_YAW_IN_RAD, MAX_YAW_IN_RAD);
+        self.trauma_pitch = self.trauma_pitch.clamp_value(-MAX_PITCH_IN_RAD, MAX_PITCH_IN_RAD);
 
         println!("seconds {}, perlin {}, trauma: {}, degrees: {}", secs_since_startup, perlin_noise_yaw, self.trauma, radians_to_degrees(self.trauma_yaw));
     }
