@@ -9,6 +9,7 @@ mod math;
 mod game_state;
 mod util;
 mod movement;
+mod ui;
 
 struct MainCamera;
 
@@ -17,8 +18,8 @@ fn main() {
 
     App::build()
         .add_resource(WindowDescriptor {
-            width: 1920,
-            height: 1080,
+            width: 800,
+            height: 600,
             vsync: true,
             title: "Pet Tower Defense".to_string(),
             cursor_visible: false,
@@ -33,7 +34,9 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(setup.system())
         .add_startup_system(setup_primitives.system())
+        .add_startup_system(ui::setup_ui.system())
         .add_startup_system(player::spawn_player.system())
+        .add_system(ui::update_splash_screen.system())
         .add_system(crate::lifetime::reduce_lifetime.system())
         .add_system(update_look_direction.system())
         .add_system(player::move_player.system())
@@ -66,6 +69,7 @@ fn setup(
             ..Default::default()
         })
         .with(MainCamera);
+        
 }
 
 #[derive(Default)]
