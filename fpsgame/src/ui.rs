@@ -1,5 +1,8 @@
-use bevy::prelude::*;
-pub struct SplashScreen;
+use bevy::{asset::LoadState, prelude::*};
+pub struct SplashScreen{
+    loaded: bool,
+    fade_in: bool,
+}
 
 pub fn setup_ui(
     mut commands: Commands,
@@ -16,26 +19,53 @@ pub fn setup_ui(
                 ..Default::default()
             },
             material: materials
-                .add(asset_server.load("images/TitleSplash.png").into()),
+                .add(ColorMaterial {
+                    texture: asset_server.load("images/TitleSplash.png").into(),
+                    color: Color::hex("FFFFFF00").unwrap(),
+                }),
             draw: Draw {
                 is_transparent: true,
                 ..Default::default()
             },
             ..Default::default()
-        }).with(SplashScreen);
+        }).with(SplashScreen {
+            fade_in: true,
+            loaded: false,
+        });
 }
 
 pub fn update_splash_screen(
     mut commands: Commands,
+    time: Res<Time>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut splash_query: Query<(Entity, &Handle<ColorMaterial>, &SplashScreen)>
+    asset_server: Res<AssetServer>,
+    mut splash_query: Query<(Entity, &Handle<ColorMaterial>, &mut SplashScreen)>
 ){
-    for (entity, material_handle, _splash_screen) in splash_query.iter_mut()
+    for (entity, material_handle, mut splash_screen) in splash_query.iter_mut()
     {
         let mat = materials.get_mut(material_handle).unwrap();
-        mat.color.set_a(mat.color.a() - 0.01);
-        if mat.color.a() <= 0.0 {
-            commands.despawn(entity);
+        if let Some(texture_handle) = &mat.texture {
+            let texture_load_state = asset_server.get_load_state(texture_handle);
+            match texture_load_state {
+                LoadState::Loaded => {
+                    splash_screen.loaded = true
+                },
+                _ => {},
+            }
+        }
+        if splash_screen.loaded
+        {
+            if splash_screen.fade_in {
+                mat.color.set_a(mat.color.a() + (0.5 * time.delta_seconds));
+                if mat.color.a() >= 1.0 {
+                    splash_screen.fade_in = false;
+                }
+            } else {
+                mat.color.set_a(mat.color.a() - (0.5 * time.delta_seconds));
+                if mat.color.a() <= 0.0 {
+                    commands.despawn(entity);
+                }
+            }
         }
     }
 }
