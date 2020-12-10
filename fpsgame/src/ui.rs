@@ -26,16 +26,16 @@ pub fn setup_ui(
 }
 
 pub fn update_splash_screen(
-    materials: ResMut<Assets<ColorMaterial>>,
-    textures: Res<Assets<Texture>>,
-    mut splash_query: Query<(&Handle<ColorMaterial>, &Handle<Texture>)>
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut splash_query: Query<(Entity, &Handle<ColorMaterial>, &SplashScreen)>
 ){
-    for(material_handle, texture) in splash_query.iter_mut()
+    for (entity, material_handle, _splash_screen) in splash_query.iter_mut()
     {
-        let mat = materials.get(material_handle).unwrap();
-        let new_mat = ColorMaterial{
-            color: mat.color,
-            texture: texture, 
-        };
+        let mat = materials.get_mut(material_handle).unwrap();
+        mat.color.set_a(mat.color.a() - 0.01);
+        if mat.color.a() <= 0.0 {
+            commands.despawn(entity);
+        }
     }
 }
