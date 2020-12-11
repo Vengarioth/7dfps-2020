@@ -1,17 +1,19 @@
 pub mod bvh;
+pub mod primitive;
 mod baking;
 mod world;
 mod util;
-mod sphere;
-mod primitive_intersection;
+mod intersection;
+pub mod test;
+mod gjk;
 
 pub use world::*;
-pub use primitive_intersection::*;
-pub use sphere::*;
+pub use intersection::*;
 
-use self::bvh::Triangle;
 use bevy::math::*;
 use gltf;
+
+use self::primitive::Triangle;
 
 pub fn create_bvh_from_gltf(path: &str) -> World {
     let (document, buffer, ..) = gltf::import(path).unwrap();

@@ -1,6 +1,7 @@
 use bevy::math::*;
 
-use super::{PrimitiveIntersection, bvh::{Bounds, Triangle}, util::closest_point_on_line_segment};
+use crate::physics::{PrimitiveIntersection, bvh::{Bounds, HasBounds}, util::closest_point_on_line_segment};
+use super::Triangle;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
@@ -100,5 +101,11 @@ impl Sphere {
         }
 
         return None;
+    }
+}
+
+impl HasBounds for Sphere {
+    fn get_bounds(&self) -> Bounds {
+        self.get_bounds()
     }
 }

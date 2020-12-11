@@ -164,6 +164,16 @@ impl Clamp for f32 {
     }
 }
 
+pub trait Approximately {
+    fn approximately(&self, other: Self) -> bool;
+}
+
+impl Approximately for f32 {
+    fn approximately(&self, other: Self) -> bool {
+        (self - other).abs() <= std::f32::EPSILON
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

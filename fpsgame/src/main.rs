@@ -39,8 +39,11 @@ fn main() {
         .add_system(player::move_player.system())
         .add_system(player::shake_when_hit_ground.system())
         .add_system(debug_player.system())
-        .add_system(crate::movement::integrate_acceleration_velocity.system())
-        .add_system(crate::movement::move_entities.system())
+        .add_system(crate::movement::apply_gravity.system())
+        .add_system(crate::movement::update_velocity.system())
+        .add_system(crate::movement::resolve_collisions.system())
+        .add_system(crate::movement::update_rigid_bodies.system())
+        .add_system(crate::movement::update_rigid_body_transforms.system())
         .add_system(crate::movement::move_kinematic_entities.system())
         .add_system(update_camera.system())
         .add_system(game_state::toggle_cursor_and_exit.system())
@@ -121,17 +124,29 @@ fn debug_player(
         }
 
         // DEBUG spawn sphere
+        let radius = 0.2;
+        let pos = pos + (look * 2.0);
         if player.action {
             commands.spawn(PbrComponents {
-                mesh: meshes.add(Mesh::from(shape::Icosphere { radius: 0.2, subdivisions: 3, })),
+                mesh: meshes.add(Mesh::from(shape::Icosphere { radius, subdivisions: 3, })),
                 material: materials.add(Color::rgb(0.5, 0.5, 0.5).into()),
                 transform: Transform::from_translation(pos),
                 ..Default::default()
-            }).with_bundle(crate::movement::MovementComponents {
-                acceleration: crate::movement::Acceleration(look * 100.0),
-                ..Default::default()
             })
-            .with(crate::lifetime::Lifetime(120));
+            .with(crate::movement::RigidBody {
+                force: Vec3::zero(),
+                mass: 1.0,
+                position: pos,
+                velocity: Vec3::zero(),
+            })
+            .with(crate::movement::Collider {
+                sphere: crate::physics::primitive::Sphere {
+                    center: Vec3::zero(),
+                    radius,
+                }
+            })
+            .with(crate::movement::Gravity(Vec3::new(0.0, -10.0, 0.0)))
+            .with(crate::lifetime::Lifetime(60 * 20 * 1000));
         }
     }
 }

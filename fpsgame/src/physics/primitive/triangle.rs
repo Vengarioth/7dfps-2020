@@ -1,6 +1,7 @@
 use bevy::math::*;
-use crate::math::Ray;
-use super::{Bounds, Intersection};
+
+use crate::{math::Ray, physics::Intersection};
+use crate::physics::bvh::{Bounds, HasBounds};
 
 #[derive(Debug)]
 pub struct Triangle {
@@ -73,5 +74,11 @@ impl Triangle {
         }
         
         return None;
+    }
+}
+
+impl HasBounds for Triangle {
+    fn get_bounds(&self) -> Bounds {
+        self.get_bounds()
     }
 }

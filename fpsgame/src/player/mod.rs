@@ -32,6 +32,7 @@ pub fn spawn_player(mut commands: Commands) {
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
+    time: Res<Time>,
     mut query: Query<(&mut Player, &mut Movement)>,
 ) {
     let mut player_move = Vec3::default();
@@ -54,17 +55,22 @@ pub fn move_player(
          player_move += Vec3::new(0.0, -1.0, 0.0);
     }
 
+    let delta = time.delta_seconds.min(0.032);
+
     for (mut player, mut movement) in query.iter_mut() {
         let sin = player.yaw.sin();
         let cos = player.yaw.cos();
 
-        player_move *= 0.016 * 10.0;
+        player_move *= delta * 10.0;
+        // player_move *= Vec3::new(1.0, 2.0, 1.0);
 
-        let player_move = Vec3::new(
+        player_move = Vec3::new(
             player_move.x() * cos - player_move.z() * sin,
             player_move.y(),
             player_move.z() * cos + player_move.x() * sin,
         );
+
+        // player_move += -Vec3::new(0.0, 9.81 * delta, 0.0);
 
         movement.0 = player_move;
 

@@ -1,14 +1,11 @@
 mod axis;
 mod bounds;
-mod triangle;
-mod intersection;
 
 pub use axis::*;
 pub use bounds::*;
-pub use triangle::*;
-pub use intersection::*;
 
 use crate::math::Ray;
+use super::{Intersection, Triangle};
 
 #[derive(Debug)]
 pub enum BvhNode {
@@ -79,6 +76,14 @@ impl Bvh {
         primitives
     }
 
+    pub fn query_bounds_iter<'a>(&'a self, query: Bounds) -> BvhIterator<'a> {
+        let mut stack = Vec::new();
+        if let Some(root) = self.root {
+            stack.push(root);
+        }
+        BvhIterator::new(self, query, stack)
+    }
+
     pub fn intersects(&self, ray: &Ray) -> Vec<Intersection> {
         let mut intersections = Vec::new();
         if let Some(root) = self.root {
@@ -124,5 +129,49 @@ impl Bvh {
                 }
             },
         }
+    }
+}
+
+pub struct BvhIterator<'a> {
+    bvh: &'a Bvh,
+    query: Bounds,
+    stack: Vec<usize>,
+}
+
+impl<'a> BvhIterator<'a> {
+    pub fn new(bvh: &'a Bvh, query: Bounds, stack: Vec<usize>) -> Self {
+        Self {
+            bvh,
+            query,
+            stack,
+        }
+    }
+
+    pub fn get_triangle(&'a self, index: usize) -> &'a Triangle {
+        &self.bvh.triangles[index]
+    }
+}
+
+impl<'a> Iterator for BvhIterator<'a> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(index) = self.stack.pop() {
+            match &self.bvh.nodes[index] {
+                BvhNode::Branch { bounds, left, right } => {
+                    if bounds.overlaps(&self.query) {
+                        self.stack.push(*left);
+                        self.stack.push(*right);
+                    }
+                },
+                BvhNode::Leaf { bounds, primitive } => {
+                    if bounds.overlaps(&self.query) {
+                        return Some(*primitive);
+                    }
+                },
+            }
+        }
+
+        None
     }
 }

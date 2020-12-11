@@ -1,4 +1,5 @@
 use crate::physics::bvh::*;
+use crate::physics::Triangle;
 
 /// Builds a BVH from a static set of triangles
 pub fn build_bvh(triangles: Vec<Triangle>) -> Bvh {

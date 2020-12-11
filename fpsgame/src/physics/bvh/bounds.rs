@@ -89,3 +89,7 @@ impl Bounds {
         2.0 * (d.x() * d.y() + d.y() * d.z() + d.z() * d.x())
     }
 }
+
+pub trait HasBounds {
+    fn get_bounds(&self) -> Bounds;
+}

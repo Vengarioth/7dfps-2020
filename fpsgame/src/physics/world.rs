@@ -1,4 +1,4 @@
-use super::{PrimitiveIntersection, Sphere, bvh::{Bvh, Intersection}};
+use super::{Intersection, PrimitiveIntersection, bvh::{Bvh, BvhIterator}, primitive::Sphere};
 use crate::math::Ray;
 
 pub struct World {
@@ -48,5 +48,38 @@ impl World {
         }
 
         best_intersection
+    }
+
+    pub fn collide_sphere_all<'a>(&'a self, sphere: &'a Sphere) -> SphereIntersectionIter<'a> {
+        let iter = self.bvh.query_bounds_iter(sphere.get_bounds());
+        SphereIntersectionIter::new(iter, sphere)
+    }
+}
+
+pub struct SphereIntersectionIter<'a> {
+    inner: BvhIterator<'a>,
+    query: &'a Sphere,
+}
+
+impl<'a> SphereIntersectionIter<'a> {
+    pub fn new(inner: BvhIterator<'a>, query: &'a Sphere) -> Self {
+        Self {
+            inner,
+            query,
+        }
+    }
+}
+
+impl<'a> Iterator for SphereIntersectionIter<'a> {
+    type Item = PrimitiveIntersection;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(primitive) = self.inner.next() {
+            if let Some(intersection) = self.query.intersects_triangle(self.inner.get_triangle(primitive)) {
+                return Some(intersection);
+            }
+        }
+
+        None
     }
 }
