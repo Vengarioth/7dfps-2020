@@ -6,15 +6,6 @@ use crate::physics::{PrimitiveIntersection, primitive::Sphere};
 pub struct Kinematic;
 
 #[derive(Debug, Default, Clone)]
-pub struct Dynamic;
-
-#[derive(Debug, Default, Clone)]
-pub struct Acceleration(pub Vec3);
-
-#[derive(Debug, Default, Clone)]
-pub struct Velocity(pub Vec3);
-
-#[derive(Debug, Default, Clone)]
 pub struct Movement(pub Vec3);
 
 #[derive(Debug, Default, Clone)]
@@ -39,6 +30,7 @@ pub struct Gravity(pub Vec3);
 #[derive(Debug)]
 pub struct RigidBody {
     pub mass: f32,
+    pub cor: f32,
     pub force: Vec3,
     pub velocity: Vec3,
     pub position: Vec3,
@@ -80,11 +72,9 @@ pub fn resolve_collisions(world: Res<crate::physics::World>, mut entities: Query
                     continue;
                 }
     
-                let cor = 0.1;
-                let j = (-(1.0 + cor) * relative_velocity.dot(relative_normal)) / (1.0 / rb.mass);
+                let j = (-(1.0 + rb.cor) * relative_velocity.dot(relative_normal)) / (1.0 / rb.mass);
     
                 let impulse = relative_normal * j * -1.0;
-                crate::util::draw_primitives::draw_line_for((rb.position, rb.position + (impulse * 10.0)), 3);
 
                 rb.velocity += impulse;
             }
@@ -113,49 +103,6 @@ pub fn update_rigid_body_transforms(mut entities: Query<(&RigidBody, &mut Transf
         transform.translation = rb.position;
     }
 }
-
-/*
-pub fn integrate_acceleration_velocity(time: Res<Time>, mut entities: Query<(&mut Movement, &mut Acceleration, &mut Velocity)>) {
-    for (mut movement, mut acceleration, mut velocity) in entities.iter_mut() {
-        velocity.0 += acceleration.0 * time.delta_seconds;
-        movement.0 += velocity.0 * time.delta_seconds;
-        acceleration.0 *= 0.1;
-        acceleration.0 += Vec3::new(0.0, -9.81, 0.0);
-    }
-}
-
-pub fn move_entities(world: Res<crate::physics::World>, mut entities: Query<(&MovementData, &mut Movement, &mut GroundedState, &mut Transform, &mut Acceleration, &mut Velocity)>) {
-    for (movement_data, mut movement, grounded_state, mut transform, mut acceleration, mut velocity) in entities.iter_mut() {
-
-        let mut length = movement.0.length();
-        let mut direction = movement.0.normalize();
-        movement.0 = Vec3::zero();
-
-        while length > 0.0 {
-            let mag = length.min(0.1);
-            let to_move = direction * mag;
-
-            let new_position = transform.translation + to_move;
-            transform.translation = new_position;
-
-            let query = Sphere::new(new_position, 0.2);
-            if let Some(intersection) = world.collide_sphere(&query) {
-                transform.translation += intersection.penetration_normal * (intersection.penetration_depth + std::f32::EPSILON);
-
-                fn reflect(vector: Vec3, normal: Vec3) -> Vec3 {
-                    vector - 2.0 * vector.dot(normal) * normal
-                }
-
-                acceleration.0 = reflect(acceleration.0, intersection.surface_normal);
-                velocity.0 = reflect(velocity.0, intersection.surface_normal);
-                direction = reflect(direction, intersection.surface_normal);
-            }
-
-            length -= mag;
-        }
-    }
-}
-*/
 
 pub fn move_kinematic_entities(world: Res<crate::physics::World>, mut entities: Query<(&Kinematic, &MovementData, &mut Movement, &mut GroundedState, &mut Transform)>) {
     for (_, movement_data, mut movement, grounded_state, mut transform) in entities.iter_mut() {

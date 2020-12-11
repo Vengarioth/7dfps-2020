@@ -4,8 +4,6 @@ mod baking;
 mod world;
 mod util;
 mod intersection;
-pub mod test;
-mod gjk;
 
 pub use world::*;
 pub use intersection::*;

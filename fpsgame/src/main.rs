@@ -136,6 +136,7 @@ fn debug_player(
             .with(crate::movement::RigidBody {
                 force: Vec3::zero(),
                 mass: 1.0,
+                cor: 0.5,
                 position: pos,
                 velocity: Vec3::zero(),
             })
