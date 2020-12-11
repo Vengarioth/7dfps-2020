@@ -2,6 +2,7 @@ use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, input::{ElementState, mouse::
 use player::Player;
 use command_line::*;
 use util::draw_primitives::*;
+use winit::{event_loop::EventLoop, dpi::PhysicalSize};
 
 mod lifetime;
 mod player;
@@ -16,20 +17,11 @@ struct MainCamera;
 
 fn main() {
     let world = physics::create_bvh_from_gltf("./assets/physics/test.glb");
-    let opt: CommandLineOpt = CommandLineOpt::new();
+    let opt = CommandLineOpt::new();
+    let window_descriptor = get_primary_physical_size(&opt);
     App::build()
-        .add_resource(WindowDescriptor {
-            width: 1920,
-            height: 1080,
-            vsync: true,
-            title: "Pet Tower Defense".to_string(),
-            cursor_visible: false,
-            cursor_locked: true,
-            mode: WindowMode::Windowed,
-            resizable: true,
-            ..Default::default()
-        })
         .add_resource(Msaa { samples: 4 })
+        .add_resource(window_descriptor)
         .add_resource(world)
         .add_resource(opt)
         .add_plugins(DefaultPlugins)
@@ -67,8 +59,39 @@ fn setup(
             transform: Transform::from_translation(Vec3::new(-3.0, 5.0, 8.0))
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
-        })
-        .with(MainCamera);
+        });
+}
+
+fn get_primary_physical_size(command_line_opt: &CommandLineOpt) -> WindowDescriptor {
+    let mut window_descriptor = WindowDescriptor {
+        width: 1920,
+        height: 1080,
+        vsync: true,
+        title: "Pet Tower Defense".to_string(),
+        cursor_visible: false,
+        cursor_locked: true,
+        mode: WindowMode::BorderlessFullscreen,
+        resizable:true,
+        ..Default::default()
+    };
+    let event_loop = EventLoop::new();
+    match event_loop.primary_monitor() {
+        Some(monitor) => {
+            window_descriptor.width = monitor.size().width;
+            window_descriptor.height = monitor.size().height;
+        },
+        None => {
+            //No screen resolution got so we're gonna assume 1920x1080
+        }
+    };
+
+    if command_line_opt.is_windowed() {
+        window_descriptor.mode = WindowMode::Windowed;
+        window_descriptor.width = window_descriptor.width - 200;
+        window_descriptor.height = window_descriptor.height - 200;
+    }
+
+    window_descriptor
 }
 
 #[derive(Default)]
