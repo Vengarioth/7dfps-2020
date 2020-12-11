@@ -44,11 +44,16 @@ pub struct Collider {
 const FIXED_UPDATE: f32 = 0.016;
 const ITERATIONS: usize = 4;
 
+// --- All force modifies
+// --- All systems that modify force must run before velocity update ---
+
 pub fn apply_gravity(mut entities: Query<(&Gravity, &mut RigidBody)>) {
     for (gravity, mut rb) in entities.iter_mut() {
         rb.force += gravity.0;
     }
 }
+
+// --- velocity update must happen before conllisions are resolved ---
 
 pub fn update_velocity(mut entities: Query<&mut RigidBody>) {
     for mut rb in entities.iter_mut() {
@@ -57,6 +62,9 @@ pub fn update_velocity(mut entities: Query<&mut RigidBody>) {
         rb.velocity += acceleration * FIXED_UPDATE;
     }
 }
+
+// --- All velocity constraints
+// --- collisions must be resolved before the rigid body update ---
 
 pub fn resolve_collisions(world: Res<crate::physics::World>, mut entities: Query<(&Collider, &mut RigidBody)>) {
     for (collider, mut rb) in entities.iter_mut() {
@@ -90,6 +98,7 @@ pub fn resolve_collisions(world: Res<crate::physics::World>, mut entities: Query
     }
 }
 
+// --- Rigid body update must happen before the transform is modified ---
 pub fn update_rigid_bodies(mut entities: Query<&mut RigidBody>) {
     for mut rb in entities.iter_mut() {
         let velocity = rb.velocity;
@@ -98,6 +107,7 @@ pub fn update_rigid_bodies(mut entities: Query<&mut RigidBody>) {
     }
 }
 
+// --- Transform is modified after all physics systems ---
 pub fn update_rigid_body_transforms(mut entities: Query<(&RigidBody, &mut Transform)>) {
     for (rb, mut transform) in entities.iter_mut() {
         transform.translation = rb.position;
