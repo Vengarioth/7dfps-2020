@@ -9,6 +9,8 @@ mod math;
 mod game_state;
 mod util;
 mod movement;
+mod pet;
+mod enemy;
 
 struct MainCamera;
 
