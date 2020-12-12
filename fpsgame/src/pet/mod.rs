@@ -1,5 +1,9 @@
 pub mod stats;
-use stats::PetStats;
+pub mod mood;
+use stats::{
+    *, PetStats
+};
+use mood::*;
 use bevy::prelude::*;
 use crate::enemy::Enemy;
 use crate::movement::{
@@ -11,15 +15,16 @@ use crate::movement::{
 
 pub struct Pet{
     stats: PetStats,
+    // mood: PetMood,
     visible_enemies: Vec<Enemy>,
     attack_time: f32,
 }
 
-pub fn ShootEnemies (
+pub fn shoot_enemies (
     mut commands: Commands,
     time: Res<Time>,
+    enemy_query: Query<(&Enemy, &Transform)>,
     mut pet_query: Query<(&mut Pet, &Transform)>,
-    enemy_query: Query<(&Enemy, &Transform)>
 ){
     //use the list of enemies to find the nearest one and shoot them
     for (mut pet, pet_transform) in pet_query.iter_mut()
@@ -28,11 +33,12 @@ pub fn ShootEnemies (
             let mut closest_enemy = 0.0;
             for (enemy, enemy_transform) in enemy_query.iter() {
                 let distance = enemy_transform.translation - pet_transform.translation;
-                // if distance.magnitude < pet.stats.attack_range
-                // {
-                //     //shoot projectile
-                //     //play throw sound
-                // }
+                    // if distance.magnitude < pet.stats.attack_range
+                    // {
+                    //     //shoot projectile
+                        
+                    //     //play throw sound
+                    // }
             }
         }
         else 
@@ -41,6 +47,15 @@ pub fn ShootEnemies (
         }
     }
 }
+
+pub fn move_pet (
+    mut commands: Commands,
+    time: Res<Time>,
+    mut pet_query: Query<(&mut Pet, &Transform)>,
+){
+
+}
+
 
 impl Pet {
     pub fn new() -> Self {
@@ -57,10 +72,12 @@ impl Pet {
         ));
     }
 }
+
 impl Default for Pet {
     fn default() -> Self {
         Self {
             stats: PetStats::new(),
+            // mood: PetMood::new(),
             visible_enemies: Vec::new(),
             attack_time: 0.0,
         }
