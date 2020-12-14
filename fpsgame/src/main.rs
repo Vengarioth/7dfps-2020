@@ -9,6 +9,7 @@ mod math;
 mod game_state;
 mod util;
 mod movement;
+mod visuals;
 
 struct MainCamera;
 
@@ -29,10 +30,13 @@ fn main() {
         })
         .add_resource(Msaa { samples: 4 })
         .add_resource(world)
+        .add_resource(visuals::PetVisualsShared::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .add_asset::<visuals::PetBodyMaterial>()
         .add_startup_system(setup.system())
         .add_startup_system(setup_primitives.system())
+        .add_startup_system(visuals::setup_pet_visuals.system())
         .add_startup_system(player::spawn_player.system())
         .add_system(crate::lifetime::reduce_lifetime.system())
         .add_system(update_look_direction.system())
