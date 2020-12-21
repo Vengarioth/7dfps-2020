@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use crate::command_line::CommandLineOpt;
+
 use crate::movement::{
     Movement,
     MovementData,
@@ -31,6 +33,7 @@ pub fn spawn_player(mut commands: Commands) {
 }
 
 pub fn move_player(
+    opt: Res<CommandLineOpt>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
     mut query: Query<(&mut Player, &mut Movement)>,
@@ -74,7 +77,7 @@ pub fn move_player(
 
         movement.0 = player_move;
 
-        if keyboard_input.just_pressed(KeyCode::T) {
+        if opt.is_debug() && keyboard_input.just_pressed(KeyCode::T) {
             player.add_trauma(0.5);
         }
     }
